@@ -7,18 +7,18 @@ import algebra.category.Module.basic
 open category_theory Top topological_space opposite
 
 
--- class PreSheafOfModules.core (X : Top) :=
--- (𝒪 : sheaf CommRing X)
--- (ℱ : presheaf Ab X)
+class PreSheafOfModules.core (X : Top) :=
+(𝒪 : sheaf CommRing X)
+(ℱ : presheaf Ab X)
 
--- class PreSheafOfModules (X : Top) extends PreSheafOfModules.core X :=
--- [is_module : Π (U : opens X), module (𝒪.1.obj (op U)) (ℱ.obj (op U))]
--- [res_add : Π (U V : opens X) (h : (op U) ⟶ (op V)) (a b : ℱ.obj (op U)), ℱ.map h (a + b) = ℱ.map h a + ℱ.map h b]
--- [res_scalar : Π (U V : opens X) (h : (op U) ⟶ (op V)) (r : 𝒪.1.obj (op U)) (a: ℱ.obj (op U)), ℱ.map h (r • a) = 𝒪.1.map h r • ℱ.map h a]
+class PreSheafOfModules (X : Top) extends PreSheafOfModules.core X :=
+[is_module : Π (U : opens X), module (𝒪.1.obj (op U)) (ℱ.obj (op U))]
+[res_add : Π (U V : opens X) (h : (op U) ⟶ (op V)) (a b : ℱ.obj (op U)), ℱ.map h (a + b) = ℱ.map h a + ℱ.map h b]
+[res_scalar : Π (U V : opens X) (h : (op U) ⟶ (op V)) (r : 𝒪.1.obj (op U)) (a: ℱ.obj (op U)), ℱ.map h (r • a) = 𝒪.1.map h r • ℱ.map h a]
 
 
--- class SheafOfModules (X : Top) extends PreSheafOfModules X :=
--- (is_sheaf : presheaf.is_sheaf ℱ)
+class SheafOfModules (X : Top) extends PreSheafOfModules X :=
+(is_sheaf : presheaf.is_sheaf ℱ)
 
 
 structure BundledModule :=
