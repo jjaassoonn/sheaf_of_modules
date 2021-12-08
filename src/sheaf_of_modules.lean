@@ -25,40 +25,90 @@ class PresheafOfModules2 {X : Top} (ℱ : @presheaf BundledModule BundledModule.
 
 open ulift
 
+@[reducible] instance int_as_cring.has_add : has_add (ulift ℤ) :=
+⟨λ x y, up (down x + down y)⟩
+
+@[simp] lemma int_as_cring.add_def (x y : ℤ) : (up x) + (up y) = up (x + y) := rfl
+
+@[reducible] instance int_as_cring.has_neg : has_neg (ulift ℤ) :=
+⟨λ x, up (- down x)⟩
+
+@[simp] lemma int_as_cring.neg_def (z : ℤ) : -(up z) = up (- z) := rfl
+
+@[reducible] instance int_as_cring.has_mul : has_mul (ulift ℤ) :=
+⟨λ x y, up (down x * down y)⟩
+
+@[simp] lemma int_as_cring.mul_def (x y : ℤ) : up x * up y = up (x * y) := rfl
+
 def int_as_cring : CommRing :=
 { α := ulift ℤ,
-  str := { add := λ x y, up (down x + down y),
-           add_assoc := sorry,
+  str := { add_assoc := λ a b c, begin
+             cases a, cases b, cases c,
+             dsimp only, rw add_assoc,
+           end,
 
            zero := up 0,
-           add_zero := sorry,
-           zero_add := sorry,
+           add_zero := λ a, begin
+             cases a,
+             dsimp only, rw add_zero,
+           end,
+           zero_add := λ a, begin
+             cases a, dsimp only, rw zero_add,
+           end,
 
            neg := λ r, up (- down r),
-           add_left_neg := sorry,
+           add_left_neg := λ a, 
+           begin
+             cases a, rw [int_as_cring.neg_def, int_as_cring.add_def, int.add_left_neg], 
+             refl,
+           end,
 
-           add_comm := sorry,
+           add_comm := λ x y, begin
+             cases x, cases y,
+             rw [int_as_cring.add_def, add_comm, int_as_cring.add_def],
+           end,
 
-           mul := λ x y, up (down x * down y),
-           mul_assoc := sorry,
-           mul_comm := sorry,
+           mul_assoc := λ x y z, begin 
+             cases x, cases y, cases z,
+             rw [int_as_cring.mul_def, int_as_cring.mul_def, mul_assoc],
+           end,
+           mul_comm := λ x y, begin
+             cases x, cases y,
+             rw [int_as_cring.mul_def, mul_comm, int_as_cring.mul_def],
+           end,
 
            one := up 1,
-           one_mul := sorry,
-           mul_one := sorry,
+           one_mul := λ a, begin
+             cases a, rw [int_as_cring.mul_def, one_mul],
+           end,
+           mul_one := λ a, begin
+             cases a, rw [int_as_cring.mul_def, mul_one],
+           end,
 
-           left_distrib := sorry,
-           right_distrib := sorry } }
+           left_distrib := λ a b c, begin
+             cases a, cases b, cases c,
+             rw [int_as_cring.add_def, int_as_cring.mul_def, mul_add],
+           end,
+           right_distrib := λ a b c, begin
+             cases a, cases b, cases c,
+             rw [int_as_cring.add_def, int_as_cring.mul_def, add_mul],
+           end,
+           ..(int_as_cring.has_add),
+           ..(int_as_cring.has_neg),
+           ..(int_as_cring.has_mul) } }
 
 @[simp] lemma lift_int.add_down (x y : int_as_cring) : (x + y).down = x.down + y.down := rfl
 @[simp] lemma lift_int.zero_down : (0 : int_as_cring).down = 0 := rfl
 
-instance test (A : AddCommGroup) : distrib_mul_action (int_as_cring) A :=
+instance int_as_cring.distrib_mul_action (A : AddCommGroup) : distrib_mul_action (int_as_cring) A :=
 { smul := λ x y, x.1 • y,
-  one_smul := λ x, sorry,
-  mul_smul := λ x y r, sorry,
-  smul_add := sorry,
-  smul_zero := sorry }
+  one_smul := λ x, by erw one_zsmul,
+  mul_smul := λ x y r, begin 
+    cases x, cases y,
+    rw [int_as_cring.mul_def, mul_zsmul],
+  end,
+  smul_add := λ r x y, by rw zsmul_add,
+  smul_zero := λ r, by rw zsmul_zero }
 
 @[simp] lemma lift_int.zsmul (A : AddCommGroup) (r : int_as_cring) (a : A) : r • a = r.1 • a := rfl
 
@@ -87,7 +137,7 @@ def as_int_module (A : AddCommGroup) : module ℤ A := by apply_instance
             dsimp only at *,
             rw [ring_hom.id_apply],
             erw add_monoid_hom.map_zsmul,
-            simp only [lift_int.zsmul],
+            erw [lift_int.zsmul],
           end }⟩ }
 
 
