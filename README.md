@@ -36,3 +36,35 @@ And if `h : U ⟶ V`, then `(ℱ.map h).1` can be seen as the restriction map of
 For `r : R` and `m : M`, `res_module (r • m) = r • res_module m`.
 Note that the `smul` on the right hand side is restriction of scalar.
 So `r • res_module m` is secretly `res_ring r • res_module m`.
+
+## Example
+
+Here is a trivial example on how to actually use this definition.
+
+So `𝒪` is a presheaf of `AddCommGroup`. We can define turn it into a
+presheaf of modules over constant sheaf of `ℤ`.
+
+```lean
+@[reducible] def psh_m {X : Top} (𝒪 : presheaf AddCommGroup X) :
+  @presheaf BundledModule BundledModule.is_cat X :=
+{ obj := λ U, { R := int_as_cring, 
+                M := { carrier := 𝒪.obj U, 
+                       is_module := is_int_module (𝒪.obj U)} },
+  map := λ U V h,
+    ⟨𝟙 _, { to_fun := λ m, 𝒪.map h m,
+            map_add' := λ x y, by rw add_monoid_hom.map_add,
+            map_smul' := λ r m, begin
+            dsimp only at *,
+            rw [ring_hom.id_apply],
+            erw add_monoid_hom.map_zsmul,
+            erw [lift_int.zsmul],
+          end }⟩ }
+
+
+instance {X : Top} (𝒪 : presheaf AddCommGroup X) :
+  (PresheafOfModules2 (psh_m 𝒪)) :=
+{ res_compatible := λ U V h r m, begin
+    dsimp only,
+    erw [smul_def', id_apply, add_monoid_hom.map_zsmul, lift_int.zsmul],
+  end }
+```
