@@ -35,9 +35,6 @@ def PresheafOfModules' (X : Top) := @presheaf BundledModule BundledModule.is_cat
 example (X : Top) (ℱ : @presheaf BundledModule BundledModule.is_cat X) 
   (U V : opens X) (h : op U ⟶ op V) (r : (ℱ.obj (op U)).R) (m : (ℱ.obj (op U)).M) : true :=
 begin
-  have : U ⊆ V,
-  have := quiver.hom.unop h,
-  rw unop_op at this,
   rcases ℱ.map h with ⟨resRing, resMod⟩,
   type_check resRing r, -- 𝒪(V)
   type_check resMod m, -- resRing* ℱ(V) is a 𝒪(U) module
