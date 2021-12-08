@@ -1,6 +1,6 @@
 # [The Category of `Mod`](https://ncatlab.org/nlab/show/Mod)
 
-I defined the category of modules at [here](src/cats.lean#L92) following the link above.
+I defined the category of modules at [here](src/cats.lean#L74) following the link above.
 This may or may not be useful to define sheaf of modules.
 
 # Sheaf of Modules
