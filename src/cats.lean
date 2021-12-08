@@ -52,7 +52,7 @@ open category_theory
 instance restriction_of_scalar.has_scalar {R S : CommRing} (f : R ⟶ S) (N : Module S) : has_scalar R N :=
 { smul := λ r m, f r • m }
 
-def restriction_of_scalar.module {R S : CommRing} (f : R ⟶ S) (N : Module S) : Module R :=
+def restriction_of_scalar.restrict {R S : CommRing} (f : R ⟶ S) (N : Module S) : Module R :=
 { carrier := N,
   is_module := 
   { one_smul := λ b, begin 
@@ -76,21 +76,21 @@ def restriction_of_scalar.module {R S : CommRing} (f : R ⟶ S) (N : Module S) :
     ..(restriction_of_scalar.has_scalar f N) } }
 
 def restriction_of_scalar.as_restriction  {R S : CommRing} {f : R ⟶ S} {N : Module S}:
-  N → restriction_of_scalar.module f N := λ m, m
+  N → restriction_of_scalar.restrict f N := λ m, m
 
 def restriction_of_scalar.restriction_as {R S : CommRing} {f : R ⟶ S} {N : Module S}:
-  restriction_of_scalar.module f N → N := λ m, m
+  restriction_of_scalar.restrict f N → N := λ m, m
 
 open restriction_of_scalar
 
 @[simp] lemma restriction_of_scalar.smul_def' {R S : CommRing} (f : R ⟶ S) 
   (r : R) (N : Module S)
-  (n : restriction_of_scalar.module f N) :
+  (n : restriction_of_scalar.restrict f N) :
   (r • n) = as_restriction (f r • restriction_as n) := rfl
 
 def restriction_of_scalar.functor
   {R S : CommRing} (f : R ⟶ S) : Module S ⥤ Module R :=
-{ obj := λ m, restriction_of_scalar.module f m,
+{ obj := λ m, restriction_of_scalar.restrict f m,
   map := λ m1 m2 l,
     { to_fun := l,
       map_add' := λ x y, by rw [linear_map.map_add],
@@ -104,10 +104,10 @@ structure BundledModule :=
 
 def restriction_of_scalar {M1 M2 : BundledModule} (f : M1.R ⟶ M2.R) : BundledModule :=
 { R := M1.R,
-  M := restriction_of_scalar.module f M2.M, }
+  M := restriction_of_scalar.restrict f M2.M, }
 
 def bundledMap (M1 M2 : BundledModule) : Type* :=
-Σ (f : M1.R ⟶ M2.R), M1.M ⟶ restriction_of_scalar.module f M2.M
+Σ (f : M1.R ⟶ M2.R), M1.M ⟶ restriction_of_scalar.restrict f M2.M
 
 instance BundledModule.is_cat : category BundledModule :=
 { hom := λ M1 M2, bundledMap M1 M2,
