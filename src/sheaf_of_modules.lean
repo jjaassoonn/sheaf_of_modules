@@ -5,23 +5,14 @@ import cats
 
 open category_theory Top topological_space opposite
 
-section attempt1
+structure PreSheafOfModules1 (X : Top) :=
+(𝒪 : presheaf CommRing X)
+(ℱ : presheaf AddCommGroup X)
+[is_module : Π (U : opens X), module (𝒪.obj (op U)) (ℱ.obj (op U))]
+(res_compitable : Π (U V : opens X) (h : (op U) ⟶ (op V)) (r : 𝒪.obj (op U)) (a: ℱ.obj (op U)), ℱ.map h (r • a) = 𝒪.map h r • ℱ.map h a)
 
-class PreSheafOfModules.core (X : Top) :=
-(𝒪 : sheaf CommRing X)
-(ℱ : presheaf Ab X)
-
-class PreSheafOfModules (X : Top) extends PreSheafOfModules.core X :=
-[is_module : Π (U : opens X), module (𝒪.1.obj (op U)) (ℱ.obj (op U))]
-[res_scalar : Π (U V : opens X) (h : (op U) ⟶ (op V)) (r : 𝒪.1.obj (op U)) (a: ℱ.obj (op U)), ℱ.map h (r • a) = 𝒪.1.map h r • ℱ.map h a]
-
-
-class SheafOfModules (X : Top) extends PreSheafOfModules X :=
-(is_sheaf : presheaf.is_sheaf ℱ)
-
-end attempt1
-
-section attempt2
+-- structure SheafOfModules (X : Top) extends PreSheafOfModules X :=
+-- (is_sheaf : presheaf.is_sheaf ℱ)
 
 open restriction_of_scalar
 
@@ -30,36 +21,44 @@ This is a presheaf of Modules over ℱ ⋙ BundledModule.forget
 
 If `h : U ⊆ V`, then `ℱ.map h` is a pair `⟨res₁, res₂⟩`, and `res₁` is the restriction map of sheaf of ring while `res₂` is the restriction map of sheaf of module.
 -/
-def PresheafOfModules' (X : Top) := @presheaf BundledModule BundledModule.is_cat X
+structure PresheafOfModules2 (X : Top) := 
+(ℱ : @presheaf BundledModule BundledModule.is_cat X)
+(res_compitable : Π (U V : opens X) (h : op U ⟶ op V) (r : (ℱ.obj (op U)).R) (m : (ℱ.obj (op U)).M), (ℱ.map h).2 (r • m) = @restriction_as _ _ (ℱ.map h).1 _ (r • (ℱ.map h).2 m))
 
-example (X : Top) (ℱ : @presheaf BundledModule BundledModule.is_cat X) 
-  (U V : opens X) (h : op U ⟶ op V) (r : (ℱ.obj (op U)).R) (m : (ℱ.obj (op U)).M) : true :=
-begin
-  rcases ℱ.map h with ⟨resRing, resMod⟩,
-  type_check resRing r, -- 𝒪(V)
-  type_check resMod m, -- resRing* ℱ(V) is a 𝒪(U) module
-  type_check r • m, -- ℱ(V)
-  type_check resMod (r • m), --resRing* ℱ(V) is a 𝒪(U) module
-  -- type_check resRing r • resMod m,
-  -- haveI : has_scalar (ℱ.obj (op V)).R (restriction_of_scalar.module resRing (ℱ.obj (op V)).M) :=
-  -- { smul := begin intros r' m', sorry end },
+example (X : Top) (psofm : PresheafOfModules2 X) : PreSheafOfModules1 X :=
+{ 𝒪 := psofm.ℱ ⋙ BundledModule.forget,
+  ℱ := 
+    { obj := 
+      λ U, AddCommGroup.of (psofm.ℱ.obj U).M, 
+      map := λ U V h, sorry },
+  res_comptiable := sorry}
 
-  -- type_check @restriction_of_scalar.has_scalar (ℱ.obj (op V)).R,
-  sorry,
-end
+-- example (X : Top) (ℱ : @presheaf BundledModule BundledModule.is_cat X) 
+--   (U V : opens X) (h : op U ⟶ op V) (r : (ℱ.obj (op U)).R) (m : (ℱ.obj (op U)).M) : true :=
+-- begin
+--   -- type_check r, -- 𝒪(U)
+--   -- type_check resRing r, -- 𝒪(V)
+--   -- type_check resMod m, -- resRing* ℱ(V) is a 𝒪(U) module
+--   -- type_check (r • resMod m), --resRing* ℱ(V) is a 𝒪(U) module
+--   have : (ℱ.map h).2 (r • m) = restriction_as (r • (ℱ.map h).2 m),
+--   { rw [restriction_of_scalar.smul_def' (ℱ.map h).1, restriction_as, as_restriction, restriction_as],
+--     dsimp only, 
+--     -- squeeze_simp,
+--      },
 
-def ex1 (X : Top) (𝒪 : presheaf CommRing X) : 
-  @presheaf BundledModule BundledModule.is_cat X :=
-{ obj := λ U, { R := 𝒪.obj U, M := { carrier := 𝒪.obj U } },
-  map := λ U V f, ⟨𝒪.map f, 
-    { to_fun := 𝒪.map f,
-      map_add' := ring_hom.map_add _,
-      map_smul' := λ r m, begin
-        rw [ring_hom.id_apply, smul_def' (𝒪.map f) r (Module.mk (𝒪.obj V)) (𝒪.map f m), as_restriction, restriction_as, 
-          algebra.id.smul_eq_mul, algebra.id.smul_eq_mul],
-        dsimp only,
-        rw ring_hom.map_mul (𝒪.map f) r m,
-        sorry
-      end, }⟩ }
+--   trivial,
+-- end
 
-end attempt2
+-- def ex1 (X : Top) (𝒪 : presheaf CommRing X) : 
+--   @presheaf BundledModule BundledModule.is_cat X :=
+-- { obj := λ U, { R := 𝒪.obj U, M := { carrier := 𝒪.obj U } },
+--   map := λ U V f, ⟨𝒪.map f, 
+--     { to_fun := 𝒪.map f,
+--       map_add' := ring_hom.map_add _,
+--       map_smul' := λ r m, begin
+--         rw [ring_hom.id_apply, smul_def' (𝒪.map f) r (Module.mk (𝒪.obj V)) (𝒪.map f m), as_restriction, restriction_as, 
+--           algebra.id.smul_eq_mul, algebra.id.smul_eq_mul],
+--         dsimp only,
+--         rw ring_hom.map_mul (𝒪.map f) r m,
+--         sorry
+--       end, }⟩ }
