@@ -7,24 +7,23 @@ This may or may not be useful to define sheaf of modules.
 
 There is also a formalisation of sheaf of modules at [here](src/sheaf_of_modules.lean#L25).
 
-I tried to define sheaf of module as
+I defined sheaf of module as
 ```lean
-class PresheafOfModules1 (X : Top) (𝒪 : presheaf CommRing X) (ℱ : presheaf AddCommGroup X) :=
-[is_module : Π (U : opens X), module (𝒪.obj (op U)) (ℱ.obj (op U))]
-(res_compatible : 
-  Π (U V : opens X) (h : (op U) ⟶ (op V)) (r : 𝒪.obj (op U)) (a: ℱ.obj (op U)), 
-    ℱ.map h (r • a) = 𝒪.map h r • ℱ.map h a)
+structure PresheafOfModules1 (X : Top) :=
+(𝒪 : presheaf CommRing X) 
+(ℱ : presheaf AddCommGroup X)
+[is_module : Π (U : (opens X)ᵒᵖ), module (𝒪.obj U) (ℱ.obj U)]
+(res_compatible : Π (U V : (opens X)ᵒᵖ) (h : U ⟶ V) (r : 𝒪.obj U) (a: ℱ.obj U),
+  ℱ.map h (r • a) = 𝒪.map h r • ℱ.map h a)
 ```
 
-But now I believe that this definition is not actually correct, the reason is that
-`ℱ.map h` for `h : U ⟶ V` is only a map in `AddCommGroup`, but we want something stronger.
+And also as
 
-So I believe the better definition is:
 ```lean
 class PresheafOfModules2 {X : Top} (ℱ : @presheaf BundledModule BundledModule.is_cat X):=
 (res_compatible : 
-  Π (U V : opens X) (h : op U ⟶ op V) (r : (ℱ.obj (op U)).R) (m : (ℱ.obj (op U)).M), 
-  (ℱ.map h).2 (r • m) = (r • (ℱ.map h).2 m))
+  Π (U V : (opens X)ᵒᵖ) (h : U ⟶ V) (r : (ℱ.obj U).R) (m : (ℱ.obj U).M), 
+    (ℱ.map h).2 (r • m) = (r • (ℱ.map h).2 m))
 ```
 
 So `ℱ` is a functor `(opens X)ᵒᵖ ⥤ BundledModule`. 
@@ -36,6 +35,9 @@ And if `h : U ⟶ V`, then `(ℱ.map h).1` can be seen as the restriction map of
 For `r : R` and `m : M`, `res_module (r • m) = r • res_module m`.
 Note that the `smul` on the right hand side is restriction of scalar.
 So `r • res_module m` is secretly `res_ring r • res_module m`.
+
+
+I wrote two functions to convert back and forth from `PresheafOfModules1` and `PresheafOfModules2`.
 
 ## Example
 
